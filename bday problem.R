@@ -1,10 +1,14 @@
-bdata <- read.csv("births.csv")
+#bdata <- read.csv("births.csv")
+#load data directly from me
+bdata <- read.csv("http://chmullig.com/wp-content/uploads/2012/06/births.csv")
+
 bdata <- bdata[(bdata$births > 1000),]
 bdata$dm <- bdata$month + bdata$day/100
 bdata$rel <- bdata$births/sum(bdata$births)
 
-m <- 25000
-top <- 80
+m <- 30000
+#m <- 1000
+top <- 75
 results_real <- rep(0,top)
 results_synthetic <- rep(0,top)
 
@@ -28,38 +32,24 @@ for (i in 1:top) {
 	}
 	results_synthetic[i] <- matches/m
 }
-plot(results_real, xlab="Group Size", ylab="Probability of match", type="l")
-lines(results_synthetic, col="red")
+png("bday_problem.png", width=768, height=768)
+plot(results_synthetic, xlab=paste("Group Size. Trials per n:", m), ylab="Probability of Matching Birthdays", main="Birthday Problem with Real Data", col="red", type="l")
+lines(results_real, col="black")
 legend("bottomright", c("Synthetic", "Real"), col=c("red", "black"), lty=1, lwd=1)
+title(sub="Source: National Vital Statistics System natality data 1969-1988, as provided by Google BigQuery.  Graph by Chris Mulligan (chmullig.com)", cex.sub=1, adj=0.75)
+dev.off()
 
-results_real
-# [1] 0.00000 0.00304 0.00844 0.01552 0.02556 0.03952 0.05704 0.07504 0.09360
-#[10] 0.11848 0.14180 0.16908 0.19264 0.22368 0.25616 0.28428 0.31392 0.35028
-#[19] 0.38288 0.41120 0.44472 0.47780 0.50840 0.54440 0.56428 0.60368 0.62856
-#[28] 0.65372 0.68056 0.70800 0.73000 0.75000 0.77728 0.79848 0.81572 0.83420
-#[37] 0.84756 0.86192 0.87860 0.88896 0.90232 0.91620 0.92512 0.93616 0.94380
-#[46] 0.94424 0.95452 0.96168 0.96596 0.97044 0.97568 0.97776 0.98272 0.98440
-#[55] 0.98656 0.98872 0.99056 0.99172 0.99336 0.99444 0.99472 0.99588 0.99604
-#[64] 0.99724 0.99764 0.99828 0.99880 0.99884 0.99908 0.99888 0.99928 0.99940
+results_diff <- results_real - results_synthetic
+diffmax <- max(abs(results_diff))
 
-results_synthetic
-# [1] 0.00000 0.00280 0.00724 0.01764 0.02732 0.03948 0.05944 0.07344 0.09176
-#[10] 0.11720 0.14096 0.16628 0.19328 0.22704 0.25472 0.28424 0.31152 0.34400
-#[19] 0.37852 0.41240 0.44696 0.47632 0.50800 0.54004 0.56468 0.60408 0.62520
-#[28] 0.65244 0.67720 0.71168 0.72856 0.75300 0.77904 0.79912 0.81424 0.83252
-#[37] 0.84988 0.86296 0.87384 0.88560 0.90336 0.91284 0.92180 0.93420 0.94016
-#[46] 0.94888 0.95444 0.96040 0.96936 0.96900 0.97208 0.97924 0.98060 0.98320
-#[55] 0.98672 0.98832 0.98988 0.99112 0.99356 0.99340 0.99528 0.99648 0.99608
-#[64] 0.99728 0.99744 0.99840 0.99836 0.99880 0.99916 0.99916 0.99936 0.99924
+res <- data.frame(n=1:top, diff=results_diff, real=results_real, synthetic=results_synthetic)
+res$smoothdiff <- predict(loess(diff ~ n, span=0.75, data=res), res$n)
 
-results_real - results_synthetic
-# [1]  0.00000  0.00024  0.00120 -0.00212 -0.00176  0.00004 -0.00240  0.00160
-# [9]  0.00184  0.00128  0.00084  0.00280 -0.00064 -0.00336  0.00144  0.00004
-#[17]  0.00240  0.00628  0.00436 -0.00120 -0.00224  0.00148  0.00040  0.00436
-#[25] -0.00040 -0.00040  0.00336  0.00128  0.00336 -0.00368  0.00144 -0.00300
-#[33] -0.00176 -0.00064  0.00148  0.00168 -0.00232 -0.00104  0.00476  0.00336
-#[41] -0.00104  0.00336  0.00332  0.00196  0.00364 -0.00464  0.00008  0.00128
-#[49] -0.00340  0.00144  0.00360 -0.00148  0.00212  0.00120 -0.00016  0.00040
-#[57]  0.00068  0.00060 -0.00020  0.00104 -0.00056 -0.00060 -0.00004 -0.00004
-#[65]  0.00020 -0.00012  0.00044  0.00004 -0.00008 -0.00028 -0.00008  0.00016
-#[73]  0.00004  0.00036  0.00000 -0.00012 -0.00012 -0.00008 -0.00004  0.00000
+png("bday_difference.png", width=768, height=768)
+plot(results_diff, xlab=paste("Group Size. Trials per n:", m), ylab="P(Real) minus P(Syntehtic)", ylim=c(-diffmax, diffmax), main="Real minus Synthetic likelihood of matching birthdays")
+abline(0,0, col="grey")
+lines(res$n, res$smoothdiff)
+title(sub="Source: National Vital Statistics System natality data 1969-1988, as provided by Google BigQuery.  Graph by Chris Mulligan (chmullig.com)", cex.sub=1, adj=0.75)
+dev.off()
+
+write.csv(res, file="bday_problem.csv")

@@ -24,7 +24,7 @@ plot(births ~ order, data=bdata, xaxt="n", xlab="Day", ylab="Births", main="Birt
 axis(1, at=by(bdata$order, list(bdata$month), min),
     labels=c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"),
     tck=1, lwd=0.5, lty=2, col="grey", cex.axis=0.99)
-title(sub="Source: National Vital Statistics System natality data, as provided by Google BigQuery.  Graph by Chris Mulligan (chmullig.com)", cex.sub=1, adj=0.75)
+title(sub="Source: National Vital Statistics System natality data 1969-1988, as provided by Google BigQuery.  Graph by Chris Mulligan (chmullig.com)", cex.sub=1, adj=0.75)
 
 #add the mean line
 abline(a=sum(bdata$births)/365.25, b=0, col="red", lwd=0.5)

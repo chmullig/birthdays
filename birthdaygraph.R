@@ -30,8 +30,8 @@ axis(1, at=c(-30, by(bdata$order, list(bdata$month), min), 367),
 title(sub="Source: National Vital Statistics System natality data 1969-1988, as provided by Google BigQuery.  Graph by Chris Mulligan (chmullig.com)", cex.sub=1, adj=0.75)
 
 #shade months 0 and 13 
-rect(-30, 0, 0, 200, col = "grey85", lwd=0)
-rect(366, 0, 396, 200, col = "grey85", lwd=0)
+rect(-30, 0, 1, 200, col = "grey90", lwd=0)
+rect(366, 0, 397, 200, col = "grey90", lwd=0)
 
 #add the mean line
 abline(a=100, b=0, col="grey20", lwd=0.5)
